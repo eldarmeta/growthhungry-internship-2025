@@ -1,4 +1,4 @@
-package com.growthhungry.hellospring;
+package com.growthhungry.hellospring.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
