@@ -1,0 +1,28 @@
+package com.growthhungry.hellospring.service;
+
+import com.growthhungry.hellospring.dto.UserRegistrationDto;
+import com.growthhungry.hellospring.model.User;
+
+import java.util.Optional;
+
+public interface UserService {
+
+    /**
+     * Регистрирует нового пользователя:
+     * - валидирует и нормализует username
+     * - проверяет уникальность
+     * - хэширует пароль через BCrypt
+     * - сохраняет в БД
+     */
+    User register(UserRegistrationDto dto);
+
+    /**
+     * Возвращает пользователя по username (для внутренних нужд).
+     */
+    Optional<User> findByUsername(String username);
+
+    /**
+     * Проверяет логин: true, если переданный raw пароль подходит к хэшу из БД.
+     */
+    boolean verifyLogin(String username, String rawPassword);
+}

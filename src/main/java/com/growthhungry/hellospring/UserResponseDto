@@ -1,0 +1,12 @@
+package com.growthhungry.hellospring.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class UserResponseDto {
+    private Long id;
+    private String username;
+}

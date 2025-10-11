@@ -1,0 +1,49 @@
+package com.growthhungry.hellospring.controller;
+
+import com.growthhungry.hellospring.dto.LoginDto;
+import com.growthhungry.hellospring.dto.UserRegistrationDto;
+import com.growthhungry.hellospring.model.User;
+import com.growthhungry.hellospring.service.UserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final UserService userService;
+
+    /**
+     * Регистрация нового пользователя.
+     * Вход: { "username": "...", "password": "..." }
+     * Выход (201): { "id": 1, "username": "..." }
+     */
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody @Valid UserRegistrationDto dto) {
+        User saved = userService.register(dto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("id", saved.getId(), "username", saved.getUsername()));
+    }
+
+    /**
+     * Логин (проверка пары логин/пароль).
+     * Вход: { "username": "...", "password": "..." }
+     * Выход (200): { "message": "Login OK" }
+     * Выход (401): { "message": "Invalid credentials" }
+     */
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody @Valid LoginDto dto) {
+        boolean ok = userService.verifyLogin(dto.getUsername(), dto.getPassword());
+        if (ok) {
+            return ResponseEntity.ok(Map.of("message", "Login OK"));
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "Invalid credentials"));
+    }
+}

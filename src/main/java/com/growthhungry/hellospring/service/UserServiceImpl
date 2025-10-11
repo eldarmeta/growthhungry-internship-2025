@@ -1,0 +1,57 @@
+package com.growthhungry.hellospring.service;
+
+import com.growthhungry.hellospring.dto.UserRegistrationDto;
+import com.growthhungry.hellospring.model.User;
+import com.growthhungry.hellospring.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+
+    private final UserRepository userRepository;     // доступ к БД
+    private final PasswordEncoder passwordEncoder;   // BCrypt (бин в SecurityConfig)
+
+    @Transactional
+    @Override
+    public User register(UserRegistrationDto dto) {
+        // 1) нормализация
+        String username = dto.getUsername().trim();
+        if (username.isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be blank");
+        }
+
+        // 2) проверка уникальности
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("Username already taken");
+        }
+
+        // 3) хэширование пароля
+        String hash = passwordEncoder.encode(dto.getPassword());
+
+        // 4) сборка и сохранение сущности
+        User user = User.builder()
+                .username(username)
+                .passwordHash(hash)
+                .build();
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Override
+    public boolean verifyLogin(String username, String rawPassword) {
+        return userRepository.findByUsername(username)
+                .map(u -> passwordEncoder.matches(rawPassword, u.getPasswordHash()))
+                .orElse(false);
+    }
+}
